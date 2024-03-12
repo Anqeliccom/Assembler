@@ -27,8 +27,8 @@ exit
 
 
 print_hexes: # int read_hexes()
-	li	t3, 28	# счётчик
-	li	t4, 0	# количество блоков
+	li	t3, 28	# counter
+	li	t4, 0	# number of blocks
 	mv 	t5, a0
 	li 	t2, 10
 	
@@ -100,8 +100,8 @@ read_hexes: # int read_hexes()
 		
 	li	s1, 10
 	li 	s2, 0
-	li	s3, 0 # счётчик
-	li	s4, 7 # количество блоков 
+	li	s3, 0 # counter
+	li	s4, 7 # number of blocks
 	
 	for:
 	bgt 	s3, s4, end_for
@@ -165,5 +165,6 @@ read_hex: #int read_hex(int a0)
 	
 	endif:	
 	mv a0, a2
+
 return:
 ret
