@@ -165,6 +165,5 @@ read_hex: #int read_hex(int a0)
 	
 	endif:	
 	mv a0, a2
-
 return:
 ret
