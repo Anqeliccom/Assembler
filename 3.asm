@@ -118,12 +118,12 @@ read_hexes: # int read_hexes()
 	bgt 	s3, s4, end_for
 	read_ch
 	beq 	a0, s1, end_for
-	mv	a1, a0
+
 	call 	read_hex
 	slli	s2, s2, 4
 	add	s2, s2, a0
 	addi 	s3, s3, 1
-	mv	a0, a1
+
 	j for
 	
 	end_for:
