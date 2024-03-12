@@ -1,8 +1,4 @@
 .text
-.macro exit
-li a7, 93
-ecall
-.end_macro
 
 .macro error %str
 .data
@@ -13,6 +9,29 @@ str2: .asciz %str
  ecall
 .end_macro
 
+.macro syscall %t
+li	a7, %t
+ecall
+.end_macro
+
+.macro read_ch
+syscall 12
+.end_macro
+
+.macro print_ch
+syscall 11
+.end_macro
+
+.macro exit
+syscall 93
+.end_macro
+
+.macro print_enter
+mv	a4, a0
+li	a0, 10
+syscall 11
+mv	a0, a4
+.end_macro
 
 main:
 call read_hexes
@@ -39,15 +58,13 @@ print_hexes: # int read_hexes()
 	bge	t1, t2, print_char
 	
 	addi	a0, t1, 48
-	li 	a7, 11
-	ecall
+	print_ch
 	addi 	t3, t3, -4
 	j for2
 	
 	print_char:
 	addi	a0, t1, 55
-	li 	a7, 11
-	ecall
+	print_ch
 	addi 	t3, t3, -4
 	j for2
 	
@@ -57,41 +74,35 @@ ret
 operation: # void operation(int a0, int a1)
 	mv 	a2, a0
 	
-	li 	a7, 12
-	ecall
+	read_ch
 	
-	# print_enter
-	mv	a4, a0
-	li	a0, 10
-	li 	a7, 11
-	ecall
-	mv	a0, a4
+	print_enter
 	
 	li 	t1, 43
 	beq 	t1, a0, summa
 	li 	t1, 45 
-	beq 	t1, a0, sub
+	beq 	t1, a0, sub_
 	li 	t1, 38 
-	beq 	t1, a0, and
+	beq 	t1, a0, and_
 	li 	t1, 124 
-	beq 	t1, a0, or
+	beq 	t1, a0, or_
 	error "invalid character"
 	
 	summa:
-	add	a0, a1, a2
+	add	a0, a2, a1
 	ret
-	sub:
-	sub 	a0, a1, a2
+	sub_:
+	sub 	a0, a2, a1
 	ret
-	and:
-	and 	a0, a1, a2
+	and_:
+	and 	a0, a2, a1
 	ret
-	or:
-	or 	a0, a1, a2
+	or_:
+	or 	a0, a2, a1
 	ret
 
 read_hexes: # int read_hexes()
-	addi	sp,sp -20
+	addi	sp, sp -20
 	sw	s1, 0(sp)
 	sw	s2, 4(sp)
 	sw	s3, 8(sp)
@@ -105,8 +116,7 @@ read_hexes: # int read_hexes()
 	
 	for:
 	bgt 	s3, s4, end_for
-	li 	a7, 12
-	ecall
+	read_ch
 	beq 	a0, s1, end_for
 	mv	a1, a0
 	call 	read_hex
@@ -123,7 +133,7 @@ read_hexes: # int read_hexes()
 	lw	s3, 8(sp)
 	lw	s2, 4(sp)
 	lw	s1, 0(sp)
-	addi	sp,sp 16
+	addi	sp, sp 20
 ret
 
 read_hex: #int read_hex(int a0)
@@ -152,12 +162,7 @@ read_hex: #int read_hex(int a0)
 	j endif
 	
 	is_not_hex:
-	# print_enter
-	mv	a4, a0
-	li	a0, 10
-	li 	a7, 11
-	ecall
-	mv	a0, a4
+	print_enter
 	
 	li 	t0, 10
 	error "this is not a hex number"
