@@ -1,14 +1,14 @@
 .include "macros.asm"
 
 main:
-call read_hexes
+call read_bcd
 mv s1, a0
-call read_hexes
+call read_bcd
 mv s2, a0
 mv a0, s1
 mv a1, s2
 call operation
-call print_hexes
+call print_bcd
 exit
 
 plus_minus:
@@ -18,7 +18,7 @@ plus_minus:
 	mv	a0, a1
 	ret
 
-print_hexes: # int read_hexes()
+print_bcd: # int print_bcd(a0)
 	li	t3, 24	# counter
 	li	t4, 0	# number of blocks
 	mv 	t5, a0
@@ -189,7 +189,7 @@ operation: # void operation(int a0, int a1, int a3, a4)
 	add	a0, a0, t1
 	ret
 
-read_hexes: # int read_hexes()
+read_bcd: # int read_bcd()
 	addi	sp, sp -20
 	sw	s1, 0(sp)
 	sw	s2, 4(sp)
@@ -207,20 +207,20 @@ read_hexes: # int read_hexes()
 	bgt 	s3, s4, end_for
 
 	read_ch
-	bnez	s3, ne_first_symbol
+	bnez	s3, not_first_symbol
 	li	t0, '-'
-	bne	a0, t0, ne_first_symbol
-	bnez	t6, ne_first_symbol
+	bne	a0, t0, not_first_symbol
+	bnez	t6, not_first_symbol
 	li	t6, 1
 	slli	t6, t6, 28
 	j for
 	
 	
 	
-	ne_first_symbol:
+	not_first_symbol:
 	beq 	a0, s1, end_for
 
-	call 	read_hex
+	call 	read
 	slli	s2, s2, 4
 	add	s2, s2, a0
 	addi 	s3, s3, 1
@@ -237,20 +237,20 @@ read_hexes: # int read_hexes()
 	lw	s1, 0(sp)
 	addi	sp, sp 20
 ret
-error "Больше 7 символов"
+error "More than 7 characters"
 
-read_hex: #int read_hex(int a0)
+read: #int read(int a0)
 	li 	t0, 48
-	bgtu 	t0, a0, is_not_hex
+	bgtu 	t0, a0, is_not_number
 	li 	t0, 57
-	bgtu	a0, t0, is_not_hex
+	bgtu	a0, t0, is_not_number
 	addi 	a2, a0, -48
 	j endif
 	
-	is_not_hex:
+	is_not_number:
 	print_enter
 	li 	t0, 10
-	error "this is not a hex number"
+	error "this is not a correct number"
 	exit
 	
 	endif:	
