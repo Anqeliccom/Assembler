@@ -6,7 +6,7 @@ ecall
 .end_macro
 
 main:
-	li	a0, 89
+	li	a0, 63
 	call func_procent
 	exit
 	
@@ -50,7 +50,7 @@ func_delenie:
 	mv 	s2, a0
 	
 	call multiply_hex
-	ble	s1, s2, verno
+	bge	s1, a0, verno
 	addi	s2, s2, -1
 	
 	verno:
