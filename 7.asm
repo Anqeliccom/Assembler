@@ -46,7 +46,7 @@ read_decimal:
 	sw	s3, 4(sp)
 	sw	ra, 8(sp)
 
-	li	s1, 0 # предыдущее
+	li	s1, 0 # previous
 	li	a0, 0
 	li	a5, 0
 	while:	
@@ -67,6 +67,10 @@ read_decimal:
 	call multiply_hex
 	add	s0, a0, s3
 	mv	s1, s0
+	li	t5, 2147483647
+	li	t6, -2147483647
+	bgt	s1, t5, exit # overflow
+	blt	s1, t6, exit # overflow
 	
 	j while
 	
@@ -242,3 +246,6 @@ func_procent: #int func_procent (int a0)
 	lw	s2, 0(sp)
 	addi	sp,sp, 8
 	ret
+	
+exit:
+syscall 93
