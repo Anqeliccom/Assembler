@@ -7,29 +7,22 @@ call read_bcd
 mv s2, a0
 mv a0, s1
 mv a1, s2
-call operation
+call select_operation
 call print_bcd
 exit
 
-plus_minus:
-	mv	a1, a0
-	li	a0, 45
-	print_ch
-	mv	a0, a1
-	ret
 
 print_bcd: # int print_bcd(a0)
 	li	t3, 24	# counter
-	li	t4, 0	# number of blocks
 	mv 	t5, a0
 	srli	t2, a0, 28
 	beqz	t2, for2
-	mv t0, a0
+
 	li a0, '-'
 	print_ch
-	mv a0, t0
+
 	for2:
-	blt 	t3, t4, end_for2
+	blt 	t3, zero, end_for2 
 	srl     t1, t5, t3
 	andi	t1,t1, 15
 	
@@ -41,8 +34,8 @@ print_bcd: # int print_bcd(a0)
 	end_for2:
 ret
 
-operation: # void operation(int a0, int a1, int a3, a4)
-	mv 	a2, a0
+select_operation: # int select_operation(int a0, a1)
+	mv a2, a0
 	srli a3, a0, 28
 	srli a4, a1, 28
 	slli a1, a1, 4
@@ -106,7 +99,8 @@ operation: # void operation(int a0, int a1, int a3, a4)
 
 	error "invalid character"
 
-	sum_:
+
+sum_: #int sum_(int a2!!!, a1)
 	li	t2, 0	# shift counter
 	li	t3, 28	# max shift
 	li	t6, 10
@@ -143,7 +137,7 @@ operation: # void operation(int a0, int a1, int a3, a4)
 	mv a0, a6
 	ret
 	
-	sub_:
+sub_: #int sub_(int a2!!!, a1)
 	li 	t1, 0
 	li	t2, 0	# shift counter
 	li	t3, 28	# max shift
@@ -190,70 +184,62 @@ operation: # void operation(int a0, int a1, int a3, a4)
 	ret
 
 read_bcd: # int read_bcd()
-	addi	sp, sp -20
+	addi	sp, sp -16
 	sw	s1, 0(sp)
 	sw	s2, 4(sp)
 	sw	s3, 8(sp)
-	sw	s4, 12(sp)
-	sw	ra, 16(sp)
+	sw	ra, 12(sp)
 		
-	li	s1, 10
-	li 	s2, 0
-	li	s3, 0 # counter
-	li	s4, 6 # number of blocks
-	li	t6, 0
+	li	t2, 10 #s1
+	li	t3, 6 # number of blocks s4
+	li 	s1, 0 #s2
+	li	s2, 0 # counter s3
+	li	s3, 0 #s5
 	
 	for:
-	bgt 	s3, s4, end_for
+	bgt 	s2, t3, end_for
 
 	read_ch
-	bnez	s3, not_first_symbol
+	bnez	s2, not_first_symbol
 	li	t0, '-'
 	bne	a0, t0, not_first_symbol
-	bnez	t6, not_first_symbol
-	li	t6, 1
-	slli	t6, t6, 28
+	bnez	s3, not_first_symbol
+	li	s3, 1
+	slli	s3, s3, 28
 	j for
 	
-	
-	
 	not_first_symbol:
-	beq 	a0, s1, end_for
+	beq 	a0, t2, end_for
 
-	call 	read
-	slli	s2, s2, 4
-	add	s2, s2, a0
-	addi 	s3, s3, 1
+	call 	ascii_to_value
+	slli	s1, s1, 4
+	add	s1, s1, a0
+	addi 	s2, s2, 1
 
 	j for
 	
 	end_for:
-	mv	a0, s2
-	add	a0, a0, t6
-	lw	ra, 16(sp)
-	lw	s4, 12(sp)
+	mv	a0, s1
+	add	a0, a0, s3
+	lw	ra, 12(sp)
 	lw	s3, 8(sp)
 	lw	s2, 4(sp)
 	lw	s1, 0(sp)
-	addi	sp, sp 20
+	addi	sp, sp 16
 ret
 error "More than 7 characters"
 
-read: #int read(int a0)
+ascii_to_value: #int ascii_to_value(int a0)
 	li 	t0, 48
 	bgtu 	t0, a0, is_not_number
 	li 	t0, 57
 	bgtu	a0, t0, is_not_number
-	addi 	a2, a0, -48
-	j endif
+	addi 	a0, a0, -48
+	ret
 	
 	is_not_number:
 	print_enter
-	li 	t0, 10
 	error "this is not a correct number"
 	exit
-	
-	endif:	
-	mv a0, a2
 return:
 ret
