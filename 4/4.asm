@@ -34,7 +34,7 @@ print_bcd: # int print_bcd(a0)
 	end_for2:
 ret
 
-select_operation: # int select_operation(int a0, a1)
+select_operation: # int select_operation(int a0, int a1)
 	mv a2, a0
 	srli a3, a0, 28
 	srli a4, a1, 28
@@ -55,16 +55,18 @@ select_operation: # int select_operation(int a0, a1)
 		beq	a0, t1, if1_1
 		beq	a0, t2, if1_2
 		error "invalid character"
+		
 		if1_2:
 		mv	t3, a2
-		mv	a2, a1
+		mv	a0, a1
 		mv	a1, t3
 		call	sub_
 		pop ra
 		ret
 
 		if1_1:
-		call sum_ # (a2, a10)
+		mv a0, a2
+		call sum_ # (a0, a1)
 		li t1, 1
 		slli t1, t1, 28
 		add a0, a0, t1
@@ -82,25 +84,42 @@ select_operation: # int select_operation(int a0, a1)
 		beq	a0, t1, if2_2
 		beq	a0, t2, if2_1
 		error "invalid character"
+		
 		if2_2:
+		mv a0, a2
 		call sub_
 		pop ra
 		ret
+		
 		if2_1:
+		mv a0, a2
 		call sum_
 		pop ra
 		ret
 	
 	nol_nol:
-		beq	a0, t1, sum_
-		beq	a0, t2, sub_
+		beq	a0, t1, mv_sum_
+		beq	a0, t2, mv_sub_
+		
+		mv_sum_:
+		mv a0, a2
+		call sum_
+		pop ra
+		ret
+		
+		mv_sub_:
+		mv a0, a2
+		call sub_
+		pop ra
+		ret
+		
 		error "invalid character"
 		ret
 
 	error "invalid character"
 
 
-sum_: #int sum_(int a2!!!, a1)
+sum_: #int sum_(int a0, int a1)
 	li	t2, 0	# shift counter
 	li	t3, 28	# max shift
 	li	t6, 10
@@ -109,7 +128,7 @@ sum_: #int sum_(int a2!!!, a1)
 	
 	for4:
 	bgt	t2, t3, end_for4
-	srl	t4, a2, t2
+	srl	t4, a0, t2
 	andi 	t4, t4, 15
 	
 	srl	t5, a1, t2
@@ -137,7 +156,7 @@ sum_: #int sum_(int a2!!!, a1)
 	mv a0, a6
 	ret
 	
-sub_: #int sub_(int a2!!!, a1)
+sub_: #int sub_(int a0, int a1)
 	li 	t1, 0
 	li	t2, 0	# shift counter
 	li	t3, 28	# max shift
@@ -145,16 +164,16 @@ sub_: #int sub_(int a2!!!, a1)
 	li	a6, 0	# addition result
 	li	a4, 0	# unit (un)occupied
 	
-	bge	a2, a1, for5
+	bge	a0, a1, for5
 	mv	t1, a1
-	mv	a1, a2
-	mv	a2, t1
+	mv	a1, a0
+	mv	a0, t1
 	li	t1, 1
 	slli	t1, t1, 28
 	
 	for5:
 	bgt	t2, t3, end_for5
-	srl	t4, a2, t2
+	srl	t4, a0, t2
 	andi 	t4, t4, 15
 	
 	srl	t5, a1, t2
@@ -190,11 +209,11 @@ read_bcd: # int read_bcd()
 	sw	s3, 8(sp)
 	sw	ra, 12(sp)
 		
-	li	t2, 10 #s1
-	li	t3, 6 # number of blocks s4
-	li 	s1, 0 #s2
-	li	s2, 0 # counter s3
-	li	s3, 0 #s5
+	li	t2, 10
+	li	t3, 6 # number of blocks
+	li 	s1, 0 
+	li	s2, 0 # counter
+	li	s3, 0 
 	
 	for:
 	bgt 	s2, t3, end_for
