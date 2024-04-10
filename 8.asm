@@ -74,6 +74,7 @@ read_decimal:
 	li	s1, 0 # предыдущее
 	li	a0, 0
 	li	a5, 0
+	li	s0, 0
 	while:	
 	read_ch
 	li t0, 45
