@@ -1,54 +1,122 @@
-.text
-
-
-.macro syscall %t
-li	a7, %t
-ecall
-.end_macro
-
-.macro read_ch
-syscall 12
-.end_macro
-
-.macro print_ch
-syscall 11
-.end_macro
-
-.macro exit
-syscall 93
-.end_macro
-
-.macro error %str
-.data
-str2: .asciz %str
-.text 
- la a0, str2
- li a7, 4
- ecall
-.end_macro
-
-.macro print_enter
-mv	a4, a0
-li	a0, 10
-syscall 11
-mv	a0, a4
-.end_macro
+.include "macros.asm"
 
 main:
 call read_decimal
+mv s0, a0
+mv s2, a1
+call read_decimal
+mv s1, a0
+mv s3, a1
+
+mv a0, s0
+mv a1, s1
+mv a2, s2
+mv a3, s3
+call sdiv
+
+mv s1, a1
+call print_decimal
+li a0, '.'
+print_ch
+mv a0, s1
 call print_decimal
 exit
 
+sdiv: #int sdiv(int a0, int a1, int a2, int a3)
+	mv s2, a0
+	mv s3, a1
+	
+	beqz	a2, first_is_pos
+	neg	a0, a0
+	beqz	a3, second_is_pos
+	neg	a1, a1
+	j second_is_pos
+	
+	first_is_pos:
+	beqz	a3, second_is_pos
+	neg	a1, a1
+	j second_is_pos
+	
+	second_is_pos:
+	bne	a2, a3, change_sign
+	push ra
+	call udiv
+	pop ra
+	ret
+	
+	change_sign:
+	push ra
+	call udiv
+	pop ra
+	neg	a0, a0
+	ret
+	
+udiv: #int udiv(int a0, int a1) return:(int a0, int a1)
+	addi	sp, sp -12
+	sw	s0, 0(sp)
+	sw	s1, 4(sp)
+	sw	ra, 8(sp)
+	
+	li	t0, 0 # len of a1
+	li	t1, 0 # counter
+	li	t2, 31
+	li	t4, 0
+	li	t5, 0 # res of cur sub
+	li	s0, 0 # answer(whole)
+	li	s1, 0 # answer (remainder)
+	li	a3, 0 # current dividend
+	mv	a2, a1
+	
+	while3:
+	beqz	a1, end_of_number
+	srli	a1, a1, 1
+	addi	t0, t0, 1
+	j while3
+	
+	end_of_number:
+	sub	t1, t2, t0
+	sll	a2, a2, t1
+	
+	while4:
+	li	t3, -1
+	slli	s0, s0, 1
+	sll	t3, t3, t1
+	and	a3, a0, t3
+	sub	t5, a3, a2
+	blt	t5, t4, dodnt_sub
+	sub	a0, a0, a2
+	addi	s0, s0, 1
+	
+	dodnt_sub:
+	srli	a2, a2, 1
+	addi	t1, t1, -1
+	blt	t1, t4, end_while4
+	j while4
+	
+	end_while4:
+	mv a1, a0
+	mv a0, s0
+	
+	lw	ra, 8(sp)
+	lw	s1, 4(sp)
+	lw	s0, 0(sp)
+	addi	sp, sp 12
+	ret
 
 read_decimal:
-	addi	sp, sp -12
-	sw	s1, 0(sp)
-	sw	s3, 4(sp)
-	sw	ra, 8(sp)
+	addi	sp, sp -20
+	sw	s0, 0(sp)
+	sw	s1, 4(sp)
+	sw	s3, 8(sp)
+	sw	s4, 12(sp)
+	sw	ra, 16(sp)
 
+	li	s0, 0
 	li	s1, 0 # previous
+	li	s4, 0
 	li	a0, 0
 	li	a5, 0
+	
 	while:	
 	read_ch
 	li t0, 45
@@ -71,9 +139,7 @@ read_decimal:
 	li	t6, -2147483647
 	bgt	s1, t5, exit # overflow
 	blt	s1, t6, exit # overflow
-	
 	j while
-	
 	
 	if1:
 	bnez	s0, is_not_number
@@ -92,20 +158,26 @@ read_decimal:
 	beq	s4, t1, minus
 	
 	mv	a0, s0
-	lw	ra, 8(sp)
-	lw	s3, 4(sp)
-	lw	s1, 0(sp)
-	addi	sp, sp 12
+	mv	a1, s4
+	lw	ra, 16(sp)
+	lw	s4, 12(sp)
+	lw	s3, 8(sp)
+	lw	s1, 4(sp)
+	lw	s0, 0(sp)
+	addi	sp, sp 20
 	ret
 	
 	minus:
 	xori	s0, s0, -1
 	addi    s0, s0 1
 	mv	a0, s0
-	lw	ra, 8(sp)
-	lw	s3, 4(sp)
-	lw	s1, 0(sp)
-	addi	sp, sp 12
+	mv	a1, s4
+	lw	ra, 16(sp)
+	lw	s4, 12(sp)
+	lw	s3, 8(sp)
+	lw	s1, 4(sp)
+	lw	s0, 0(sp)
+	addi	sp, sp 20
 	ret
 
 	
