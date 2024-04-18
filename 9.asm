@@ -16,8 +16,7 @@ call sdiv
 
 mv s1, a1
 call print_decimal
-li a0, '.'
-print_ch
+print_enter
 mv a0, s1
 call print_decimal
 exit
@@ -103,7 +102,7 @@ udiv: #int udiv(int a0, int a1) return:(int a0, int a1)
 	addi	sp, sp 12
 	ret
 
-read_decimal:
+read_decimal: # int read_decimal()
 	addi	sp, sp -20
 	sw	s0, 0(sp)
 	sw	s1, 4(sp)
@@ -180,52 +179,50 @@ read_decimal:
 	addi	sp, sp 20
 	ret
 
-	
-print_decimal:
+print_decimal: # int print_decimal(int a0)
+	addi	sp, sp -12
+	sw	ra, 0(sp)
+	sw	s0, 4(sp)
+	sw	s1, 8(sp)
+	li	s1, 0
+	mv	s0, a0
+	mv	t2, a0
 
-addi	sp, sp -12
-sw	ra, 0(sp)
-sw	s0, 4(sp)
-sw	s1, 8(sp)
-addi	sp, sp, -12
-mv	s1, sp
-mv	s0, a0
-mv	t2, a0
+	srli	t2, t2, 31
+	beqz	t2, while2
+	li	a0, 45
+	print_ch
+	addi	s0,s0, -1
+	xori	a0, s0, -1
 
-srli	t2, t2, 31
-beqz	t2, while2
-li	a0, 45
-print_ch
-addi	s0,s0, -1
-xori	a0, s0, -1
+	while2:
+	mv	s0, a0
+	call func_procent
+	addi	a0, a0, 48
+	addi sp, sp, -4
+	sw	a0, 0(sp)
+	addi	s1, s1, 1
+	addi	a0, a0, -48
 
-while2:
-mv	s0, a0
-call func_procent
-addi	a0, a0, 48
-sb	a0, 0(s1)
-addi	s1, s1, 1
-addi	a0, a0, -48
+	mv a0, s0
+	call	func_delenie
+	beq	a0, zero, vixod3
+	j while2
 
-mv a0, s0
-call	func_delenie
-beq	a0, zero, vixod3
-j while2
+	vixod3:
+	ble	s1, zero, vixod5
+	lw	a0, 0(sp)
+	addi sp, sp, 4
+	print_ch
+	addi	s1, s1, -1
+	j vixod3
 
-vixod3:
-blt	s1, sp, vixod5
-lb	a0, 0(s1)
-print_ch
-addi	s1, s1, -1
-j vixod3
-
-vixod5:
-addi	sp, sp, 12
-lw	s1, 8(sp)
-lw	s0, 4(sp)
-lw	ra, 0(sp)
-addi	sp, sp, 12
-ret
+	vixod5:
+	lw	s1, 8(sp)
+	lw	s0, 4(sp)
+	lw	ra, 0(sp)
+	addi	sp, sp, 12
+	ret
 
 delenie: # int delenie (int a0)
 	addi	sp,sp -8
