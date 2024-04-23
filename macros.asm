@@ -6,6 +6,7 @@ str2: .asciz %str
  la a0, str2
  li a7, 4
  ecall
+ exit
 .end_macro
 
 .macro push %register

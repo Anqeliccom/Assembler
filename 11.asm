@@ -1,3 +1,5 @@
+j main
+
 .include "macros.asm"
 .include "file_functions.asm"
 
@@ -89,8 +91,8 @@ flength: # int flength(int fd)
 	LSeek
 	mv 	t3, a0
 	mv 	a0, t2
-	mv 	a1, t1
-	li 	a2, SEEK_CUR
+	li 	a1, 0
+	li 	a2, SEEK_SET
 	LSeek
 	mv 	a0, t3
 	ret
