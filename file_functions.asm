@@ -19,3 +19,38 @@ read_error:
 close_file: # void close_file(int fd)
 	syscall 57
 	ret
+
+.macro malloc
+syscall 9
+.end_macro
+
+.macro LSeek
+syscall 62
+li 	t0, -1
+beq 	a0, t0, flength_error
+.end_macro
+
+.eqv SEEK_SET 0
+.eqv SEEK_CUR 1
+.eqv SEEK_END 2
+
+flength: # int flength(int fd)
+	mv 	t2, a0
+	li 	a1, 0
+	li 	a2, SEEK_CUR
+	LSeek
+	mv 	t1, a0
+	mv 	a0, t2
+	li 	a1, 0
+	li 	a2, SEEK_END
+	LSeek
+	mv 	t3, a0
+	mv 	a0, t2
+	li 	a1, 0
+	li 	a2, SEEK_SET
+	LSeek
+	mv 	a0, t3
+	ret
+
+flength_error:
+	error "some kind of error with file"
