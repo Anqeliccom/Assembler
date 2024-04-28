@@ -24,7 +24,7 @@
  li 	a1, %char
  mv 	s2, a1
  
- call strchr
+ jalr 	s10
  mv 	s3, a0
  beqz 	a0, OK_falied_none
  sub 	s3, s3, s0
@@ -76,7 +76,7 @@
  mv 	s0, a0
  li 	a1, %char
  mv 	s2, a1
- call strchr
+ jalr 	s10
  mv 	s3, a0
  bnez 	a0, NONE_falied
  addi 	s4, s4, 1
@@ -104,8 +104,7 @@ NONE_falied:
  message "Passed: "
  mv	a0, s4
  print_int
- message ",\n"
- message "failed: "
+ message ", failed: "
  mv	a0, s5
  print_int
  message "\n"

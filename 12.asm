@@ -22,9 +22,7 @@ main_continue:
 	call flength
 	mv 	a1, a0 # a1: size
 	mv	a0, s1
-	push ra
 	call insert
-	pop ra
 	
 	call count_str
 	print_int
@@ -32,6 +30,7 @@ main_continue:
 	exit
 	
 insert:
+	push ra
 	mv	t0, a0
 	mv	t1, a1
 	mv	a0, a1
@@ -45,6 +44,7 @@ insert:
 	mv	a2, t1
 	call read_file
 	mv	a0, t2
+	pop ra
 	ret		
 	
 count_str:
