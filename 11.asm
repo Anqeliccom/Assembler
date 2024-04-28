@@ -3,44 +3,6 @@ j main
 .include "macros.asm"
 .include "file_functions.asm"
 
-.macro malloc
-syscall 9
-.end_macro
-
-.macro message_int %str, %register
-.data
-str2: .asciz %str
-.text 
-la a0, str2
-li a7, 4
-ecall
-mv a0, %register
-li a7, 1
-ecall
-.end_macro
-
-.macro message_str %str, %register
-.data
-str2: .asciz %str
-.text 
-la a0, str2
-li a7, 4
-ecall
-mv a0, %register
-li a7, 4
-ecall
-.end_macro
-
-.macro LSeek
-syscall 62
-li 	t0, -1
-beq 	a0, t0, flength_error
-.end_macro
-
-.eqv SEEK_SET 0
-.eqv SEEK_CUR 1
-.eqv SEEK_END 2
-
 
 main: # void main(int arg_count, char** args)
 mv 	s10, a0  #  count of arguments
@@ -78,24 +40,3 @@ len:
 	mv 	a0, s1
 	call close_file
 	exit
-
-flength: # int flength(int fd)
-	mv 	t2, a0
-	li 	a1, 0
-	li 	a2, SEEK_CUR
-	LSeek
-	mv 	t1, a0
-	mv 	a0, t2
-	li 	a1, 0
-	li 	a2, SEEK_END
-	LSeek
-	mv 	t3, a0
-	mv 	a0, t2
-	li 	a1, 0
-	li 	a2, SEEK_SET
-	LSeek
-	mv 	a0, t3
-	ret
-
-flength_error:
-	error "some kind of error with file"

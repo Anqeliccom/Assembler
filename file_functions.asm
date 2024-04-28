@@ -54,3 +54,16 @@ flength: # int flength(int fd)
 
 flength_error:
 	error "some kind of error with file"
+
+strchr: # char* strchr(char* str, char ch)
+	lb	t0, 0(a0)
+	beq	t0, zero, strchr_zero
+	beq	t0, a1, strchr_end
+	addi	a0, a0, 1
+	j	strchr
+	
+	strchr_zero:
+	li	a0, 0
+	
+	strchr_end:
+	ret

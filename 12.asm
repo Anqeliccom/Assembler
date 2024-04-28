@@ -8,11 +8,11 @@ main: # void main(int arg_count, char** args)
 mv 	s10, a0  #  count of arguments
 mv 	s11, a1  #  arguments
 li 	t0, 1
-beq 	s10, t0, len2
+beq 	s10, t0, main_continue
 error "incorrect number of arguments"
 
 
-len2:
+main_continue:
 	lw 	s1, 0(s11)
 	mv 	a0, s1
 	li 	a1, 0 # READ
@@ -21,14 +21,13 @@ len2:
 	
 	call flength
 	mv 	a1, a0 # a1: size
-	
 	mv	a0, s1
 	push ra
 	call insert
 	pop ra
 	
 	call count_str
-	syscall 1
+	print_int
 	call close_file
 	exit
 	
@@ -37,7 +36,7 @@ insert:
 	mv	t1, a1
 	mv	a0, a1
 	addi	a0, a0, 1
-	syscall 9
+	malloc
 	mv	t2, a0
 	add	t3, a0, t1
 	sb	zero, 1(t3)
@@ -65,17 +64,4 @@ count_str:
 	mv a0, s3
 	pop s3
 	pop ra
-	ret
-	
-strchr: # char* strchr(char* str, char ch)
-	lb	t0, 0(a0)
-	beq	t0, zero, strchr_zero
-	beq	t0, a1, strchr_end
-	addi	a0, a0, 1
-	j	strchr
-	
-	strchr_zero:
-	li	a0, 0
-	
-	strchr_end:
 	ret
