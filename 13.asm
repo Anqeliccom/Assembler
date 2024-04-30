@@ -30,6 +30,7 @@ main_continue:
 	call insert
 	call split_lines	
 	mv 	a2, a1 # a2: number of str
+	li	a1, 1
 	li 	t0, 1
 	beq 	t0, s10, print_table
 	bge	s9, a2, error_N
@@ -51,12 +52,12 @@ main_continue:
 	print_table_while:
 	mv	a0, t1
 	print_int
-	lw 	t1, 0(s0)
-	message_str "\t ", t1
+	lw 	t2, 0(s0)
+	message_str "\t ", t2
 	print_enter
 	addi 	t1, t1, 1
 	addi 	s0, s0, 4
-	bne 	t0, s1, print_table_while
+	bne 	t1, s1, print_table_while
 	print_enter
 	mv a0, s1
 	call close_file
@@ -108,7 +109,6 @@ split_lines:
 	malloc
 	mv 	s2, a0  # array of str
 	mv 	s3, a0  # counter
-	addi	s3, s3, 4
 	mv 	a0, s0
 		
 	split_lines_while:
