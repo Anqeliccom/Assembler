@@ -1,17 +1,17 @@
-j strstr
-
 .macro lower_case %reg
- li 	t0, 65 # 'A'
- blt 	%reg, t0, lower_case_end
- li 	t0, 90 # 'Z'
- bgt 	%reg, t0, lower_case_end
+ li 	t5, 65 # 'A'
+ blt 	%reg, t5, lower_case_end
+ li 	t5, 90 # 'Z'
+ bgt 	%reg, t5, lower_case_end
  addi 	%reg, %reg, 32
  lower_case_end:
 .end_macro
 
 strchr_i: # char* strchr(char* str, char ch, bool flag)
+	push ra
+	strchr_i2:
 	lb	t0, 0(a0)
-	beq	t0, zero, strchr_zero2
+	beqz	t0, strchr_zero2
 	
 	beqz	a2, strchr_i_zero
 	lower_case t0
@@ -20,12 +20,13 @@ strchr_i: # char* strchr(char* str, char ch, bool flag)
 	strchr_i_zero:
 	beq	t0, a1, strchr_i_end
 	addi	a0, a0, 1
-	j	strchr_i
+	j	strchr_i2
 	
 	strchr_zero2:
 	li	a0, 0
 	
 	strchr_i_end:
+	pop ra
 	ret
 
 strstr: # char* strstr(char* str, char* substr, bool flag)
@@ -73,5 +74,6 @@ strstr: # char* strstr(char* str, char* substr, bool flag)
 	pop s2
 	pop s1
 	pop s0
+	pop ra
 	ret
 	
